@@ -121,24 +121,31 @@ class TestDuplicateDetection:
         self, tmp_path, sample_chunk: DocumentChunk
     ) -> None:
         """A chunk that has never been ingested must not be flagged as duplicate."""
-        # TODO: implement using a test ChromaDB path in tmp_path
-        # store = VectorStoreManager(settings=test_settings(chroma_db_path=tmp_path))
-        # assert store.check_duplicate(sample_chunk.chunk_id) is False
-        pytest.skip("Implement after VectorStoreManager is complete")
+        from rag_agent.config import Settings
+        settings = Settings(chroma_db_path=str(tmp_path), chroma_collection_name="test")
+        store = VectorStoreManager(settings=settings)
+        assert store.check_duplicate(sample_chunk.chunk_id) is False
 
     def test_ingested_chunk_is_duplicate(
         self, tmp_path, sample_chunk: DocumentChunk
     ) -> None:
         """A chunk that has been ingested must be flagged as duplicate on re-check."""
-        # TODO: ingest chunk, then check_duplicate → True
-        pytest.skip("Implement after VectorStoreManager is complete")
+        from rag_agent.config import Settings
+        settings = Settings(chroma_db_path=str(tmp_path), chroma_collection_name="test")
+        store = VectorStoreManager(settings=settings)
+        store.ingest([sample_chunk])
+        assert store.check_duplicate(sample_chunk.chunk_id) is True
 
     def test_ingestion_skips_duplicate(
         self, tmp_path, sample_chunk: DocumentChunk
     ) -> None:
         """Ingesting the same chunk twice must result in skipped=1 on second call."""
-        # TODO: ingest once, ingest again, check IngestionResult.skipped == 1
-        pytest.skip("Implement after VectorStoreManager is complete")
+        from rag_agent.config import Settings
+        settings = Settings(chroma_db_path=str(tmp_path), chroma_collection_name="test")
+        store = VectorStoreManager(settings=settings)
+        store.ingest([sample_chunk])
+        result = store.ingest([sample_chunk])
+        assert result.skipped == 1
 
 
 # ---------------------------------------------------------------------------
@@ -158,8 +165,12 @@ class TestRetrieval:
         self, tmp_path, sample_chunk: DocumentChunk
     ) -> None:
         """A query semantically similar to an ingested chunk must return results."""
-        # TODO: ingest sample_chunk, query "LSTM gate mechanism", assert len > 0
-        pytest.skip("Implement after VectorStoreManager is complete")
+        from rag_agent.config import Settings
+        settings = Settings(chroma_db_path=str(tmp_path), chroma_collection_name="test", similarity_threshold=0.1)
+        store = VectorStoreManager(settings=settings)
+        store.ingest([sample_chunk])
+        results = store.query("LSTM gate mechanism")
+        assert len(results) > 0
 
     def test_irrelevant_query_returns_empty(self, tmp_path) -> None:
         """
@@ -168,9 +179,11 @@ class TestRetrieval:
         This tests the hallucination guard threshold. The system must return
         an empty list — not low-quality chunks — when nothing matches.
         """
-        # TODO: ingest sample_chunk, query "history of the roman empire"
-        # assert result == []
-        pytest.skip("Implement after VectorStoreManager is complete")
+        from rag_agent.config import Settings
+        settings = Settings(chroma_db_path=str(tmp_path), chroma_collection_name="test", similarity_threshold=0.5)
+        store = VectorStoreManager(settings=settings)
+        results = store.query("history of the roman empire")
+        assert results == []
 
     def test_topic_filter_restricts_results(
         self,
@@ -179,13 +192,21 @@ class TestRetrieval:
         bonus_chunk: DocumentChunk,
     ) -> None:
         """Results with topic_filter='LSTM' must not include GAN chunks."""
-        # TODO: ingest both chunks, query with topic_filter="LSTM"
-        # assert all(c.metadata.topic == "LSTM" for c in results)
-        pytest.skip("Implement after VectorStoreManager is complete")
+        from rag_agent.config import Settings
+        settings = Settings(chroma_db_path=str(tmp_path), chroma_collection_name="test", similarity_threshold=0.1)
+        store = VectorStoreManager(settings=settings)
+        store.ingest([sample_chunk, bonus_chunk])
+        results = store.query("gate mechanism", topic_filter="LSTM")
+        assert all(c.metadata.topic == "LSTM" for c in results)
 
     def test_results_sorted_by_score_descending(
         self, tmp_path, sample_chunk: DocumentChunk
     ) -> None:
         """Retrieved chunks must be sorted with highest similarity first."""
-        # TODO: ingest multiple chunks, verify scores are non-increasing
-        pytest.skip("Implement after VectorStoreManager is complete")
+        from rag_agent.config import Settings
+        settings = Settings(chroma_db_path=str(tmp_path), chroma_collection_name="test", similarity_threshold=0.1)
+        store = VectorStoreManager(settings=settings)
+        store.ingest([sample_chunk])
+        results = store.query("LSTM gate mechanism")
+        scores = [r.score for r in results]
+        assert scores == sorted(scores, reverse=True)
