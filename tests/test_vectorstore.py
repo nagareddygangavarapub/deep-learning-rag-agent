@@ -121,9 +121,17 @@ class TestDuplicateDetection:
         self, tmp_path, sample_chunk: DocumentChunk
     ) -> None:
         """A chunk that has never been ingested must not be flagged as duplicate."""
+        import uuid, chromadb
         from rag_agent.config import Settings
-        settings = Settings(chroma_db_path=str(tmp_path), chroma_collection_name="test")
-        store = VectorStoreManager(settings=settings)
+        unique_name = f"test_{uuid.uuid4().hex[:8]}"
+        settings = Settings(chroma_db_path=str(tmp_path), chroma_collection_name=unique_name)
+        # bypass lru_cache by directly creating a fresh store
+        store = VectorStoreManager.__new__(VectorStoreManager)
+        store._settings = settings
+        from rag_agent.config import EmbeddingFactory
+        store._embeddings = EmbeddingFactory(settings).create()
+        store._client = chromadb.PersistentClient(path=str(tmp_path))
+        store._collection = store._client.get_or_create_collection(unique_name, metadata={"hnsw:space": "cosine"})
         assert store.check_duplicate(sample_chunk.chunk_id) is False
 
     def test_ingested_chunk_is_duplicate(
