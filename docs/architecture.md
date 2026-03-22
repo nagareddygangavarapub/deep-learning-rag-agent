@@ -2,11 +2,11 @@
 ## Team: ___________________
 ## Date: ___________________
 ## Members and Roles:
-- Corpus Architect: ___________________
-- Pipeline Engineer: ___________________
-- UX Lead: ___________________
-- Prompt Engineer: ___________________
-- QA Lead: ___________________
+- Corpus Architect: Nagareddy Gangavarapu Balareddy
+- Pipeline Engineer: Nagareddy Gangavarapu Balareddy
+- UX Lead: Nagareddy Gangavarapu Balareddy
+- Prompt Engineer: Nagareddy Gangavarapu Balareddy
+- QA Lead: Nagareddy Gangavarapu Balareddy
 
 ---
 
