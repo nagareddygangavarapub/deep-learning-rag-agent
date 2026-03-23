@@ -110,6 +110,14 @@ def get_settings() -> Settings:
     Uses lru_cache so the .env file is only parsed once per process.
     Call get_settings() anywhere in the codebase to access configuration.
     """
+    import os
+    try:
+        import streamlit as st
+        for key, value in st.secrets.items():
+            if isinstance(value, str):
+                os.environ.setdefault(key, value)
+    except Exception:
+        pass
     return Settings()
 
 
