@@ -174,6 +174,27 @@ class LLMFactory:
             raise ValueError(f"Unsupported LLM provider: {provider}")
 
     def _create_groq(self) -> BaseChatModel:
+        """Create Groq chat model."""
+        from langchain_groq import ChatGroq
+        import os
+        api_key = ""
+        # 1. Try st.secrets first (Streamlit Cloud)
+        try:
+            import streamlit as st
+            api_key = st.secrets.get("GROQ_API_KEY", "")
+        except Exception:
+            pass
+        # 2. Try environment variable
+        if not api_key:
+            api_key = os.environ.get("GROQ_API_KEY", "")
+        # 3. Try settings
+        if not api_key:
+            api_key = self._settings.groq_api_key
+        if not api_key:
+            raise EnvironmentError("GROQ_API_KEY not found in secrets, env, or settings")
+        return ChatGroq(api_key=api_key, model="llama-3.1-8b-instant")
+
+    def _create_groq_DISABLED(self) -> BaseChatModel:
         """
         Create a Groq-backed chat model.
 
