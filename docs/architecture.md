@@ -385,17 +385,23 @@ Could you provide more context or clarify which specific source this question is
 
 ## Team Retrospective
 
-*(fill in after Hour 3)*
+
 
 **What clicked:**
--
+-LangGraph conditional edges made the hallucination guard clean, explicit, and testable
+- ChromaDB PersistentClient made local development simple with no external dependencies
+- RecursiveCharacterTextSplitter with markdown separators produced good chunk quality
+- Streamlit cache_resource kept the embedding model and vector store loaded efficiently
 
 **What confused us:**
--
+-AgentState behaves as a dict not an object so state.attribute access fails silently
+- Streamlit cache_resource caches old code requiring full app restart after file changes
+- Streamlit Cloud secrets box UI was difficult to edit requiring multiple attempts
+- LangGraph node functions must return a dict of state updates not None or the graph stalls
 
 **One thing each team member would study before a real interview:**
-- Corpus Architect:
-- Pipeline Engineer:
-- UX Lead:
-- Prompt Engineer:
-- QA Lead:
+- Corpus Architect:Chunk size optimisation and semantic coherence evaluation metrics
+- Pipeline Engineer:ChromaDB HNSW index parameters and approximate nearest neighbour theory
+- UX Lead:Streamlit async patterns for non-blocking ingestion using threading and st.empty
+- Prompt Engineer:Structured output reliability across different LLMs and JSON repair strategies
+- QA Lead:Embedding model evaluation using the MTEB benchmark leaderboard
