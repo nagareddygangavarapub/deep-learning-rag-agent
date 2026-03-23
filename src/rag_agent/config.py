@@ -185,6 +185,7 @@ class LLMFactory:
         """
         from langchain_groq import ChatGroq
         import os
+        # Try settings first, then st.secrets, then env directly
         api_key = self._settings.groq_api_key
         if not api_key:
             try:
@@ -196,9 +197,15 @@ class LLMFactory:
             api_key = os.environ.get("GROQ_API_KEY", "")
         if not api_key:
             raise EnvironmentError("GROQ_API_KEY is not set")
+        model = self._settings.groq_model or os.environ.get("GROQ_MODEL", "llama-3.1-8b-instant")
+        try:
+            import streamlit as st
+            model = st.secrets.get("GROQ_MODEL", model)
+        except Exception:
+            pass
         return ChatGroq(
             api_key=api_key,
-            model=self._settings.groq_model,
+            model=model,
         )
 
     def _create_ollama(self) -> BaseChatModel:
