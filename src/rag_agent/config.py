@@ -176,10 +176,20 @@ class LLMFactory:
         inference for significantly lower latency than GPU-based inference.
         """
         from langchain_groq import ChatGroq
-        if not self._settings.groq_api_key:
-            raise EnvironmentError("GROQ_API_KEY is not set in .env")
+        import os
+        api_key = self._settings.groq_api_key
+        if not api_key:
+            try:
+                import streamlit as st
+                api_key = st.secrets.get("GROQ_API_KEY", "")
+            except Exception:
+                pass
+        if not api_key:
+            api_key = os.environ.get("GROQ_API_KEY", "")
+        if not api_key:
+            raise EnvironmentError("GROQ_API_KEY is not set")
         return ChatGroq(
-            api_key=self._settings.groq_api_key,
+            api_key=api_key,
             model=self._settings.groq_model,
         )
 
